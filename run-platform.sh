@@ -48,15 +48,8 @@ check_dependencies() {
 display_banner() {
   # Make sure the console is huge
   if test $(tput cols) -ge 64; then
-    echo " █████   █████"
-    echo "░░███   ░░███ "
-    echo " ░███    ░███ "
-    echo " ░███    ░███ "
-    echo " ░███    ░███ "
-    echo " ░███    ░███ "
-    echo " ░░█████████     >UNSTRACT COMMUNITY EDITION"
-    echo "  ░░░░░░░░░   "
-    echo ""
+    echo ">UNSTRACT COMMUNITY EDITION"
+
     sleep 1
   fi
 }
@@ -73,7 +66,9 @@ display_help() {
   echo -e "   -u, --update        Update services version"
   echo -e "   -x, --trace         Enables trace mode"
   echo -e "   -V, --verbose       Print verbose logs"
+  echo -e "   -d, --dev           Run in development mode (hot reloading)"
   echo -e "   -v, --version       Docker images version tag (default \"latest\")"
+  echo -e "   -s, --stop          Stop running containers"
   echo -e ""
 }
 
@@ -103,6 +98,9 @@ parse_args() {
       -V | --verbose)
         opt_verbose=true
         ;;
+      -d | --dev)
+        opt_dev_mode=true
+        ;;
       -v | --version)
         if [ -z "${2-}" ]; then
           echo "No version specified."
@@ -113,6 +111,9 @@ parse_args() {
           opt_version="$2"
         fi
         shift
+        ;;
+      -s | --stop)
+        opt_stop=true
         ;;
       *)
         echo "'$1' is not a known command."
@@ -130,6 +131,8 @@ parse_args() {
   debug "OPTION upgrade: $opt_update"
   debug "OPTION verbose: $opt_verbose"
   debug "OPTION version: $opt_version"
+  debug "OPTION dev_mode: $opt_dev_mode"
+  debug "OPTION stop: $opt_stop"
 }
 
 do_git_pull() {
@@ -251,9 +254,12 @@ build_services() {
     }
   elif [ "$first_setup" = true ] || [ "$opt_update" = true ]; then
     echo -e "$blue_text""Pulling""$default_text"" docker images tag ""$blue_text""$opt_version""$default_text""."
-    # Try again on a slow network.
-    VERSION=$opt_version $docker_compose_cmd -f "$script_dir/docker/docker-compose.yaml" pull ||
-    VERSION=$opt_version $docker_compose_cmd -f "$script_dir/docker/docker-compose.yaml" pull || {
+    compose_files=("-f" "docker-compose.yaml")
+    if [ "$opt_dev_mode" = true ]; then
+      compose_files+=("-f" "docker-compose-dev.yaml")
+    fi
+    VERSION=$opt_version $docker_compose_cmd "${compose_files[@]}" pull ||
+    VERSION=$opt_version $docker_compose_cmd "${compose_files[@]}" pull || {
       echo -e "$red_text""Failed to pull docker images.""$default_text"
       echo -e "$red_text""Either version not found or docker is not running.""$default_text"
       echo -e "$red_text""Please check and try again.""$default_text"
@@ -273,7 +279,11 @@ run_services() {
   pushd "$script_dir/docker" 1>/dev/null
 
   echo -e "$blue_text""Starting docker containers in detached mode""$default_text"
-  VERSION=$opt_version $docker_compose_cmd up -d
+  compose_files=("-f" "docker-compose.yaml")
+  if [ "$opt_dev_mode" = true ]; then
+    compose_files+=("-f" "docker-compose-dev.yaml")
+  fi
+  VERSION=$opt_version $docker_compose_cmd "${compose_files[@]}" up -d
 
   if [ "$opt_update" = true ]; then
     echo ""
@@ -303,6 +313,10 @@ run_services() {
     echo -e "###################################################################"
   fi
 
+  if [ "$opt_dev_mode" = true ]; then
+    echo -e "$yellow_text""Running in DEVELOPMENT mode with hot reloading""$default_text"
+  fi
+
   popd 1>/dev/null
 }
 
@@ -317,6 +331,8 @@ opt_build_local=false
 opt_update=false
 opt_verbose=false
 opt_version="latest"
+opt_dev_mode=false
+opt_stop=false
 
 script_dir=$(dirname "$(readlink -f "$BASH_SOURCE")")
 first_setup=false
@@ -327,6 +343,18 @@ target_branch=""
 
 display_banner
 parse_args $*
+
+if [ "$opt_stop" = true ]; then
+  pushd "$script_dir/docker" 1>/dev/null
+  echo -e "$yellow_text""Stopping containers""$default_text"
+  compose_files=("-f" "docker-compose.yaml")
+  if [ "$opt_dev_mode" = true ]; then
+    compose_files+=("-f" "docker-compose-dev.yaml")
+  fi
+  VERSION=$opt_version $docker_compose_cmd "${compose_files[@]}" down
+  popd 1>/dev/null
+  exit 0
+fi
 
 do_git_pull
 setup_env

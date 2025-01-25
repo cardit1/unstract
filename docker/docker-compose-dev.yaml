@@ -1,0 +1,13 @@
+# Development-specific overrides
+services:
+  frontend:
+    build: ../frontend
+    volumes:
+      - ../frontend:/app
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+
+  backend:
+    environment:
+      - DEBUG=True 

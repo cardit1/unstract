@@ -21,6 +21,10 @@ media
 # C extensions
 *.so
 
+# cursor 
+.cursorrules
+.cursorignore
+
 # Distribution / packaging
 .Python
 build/
