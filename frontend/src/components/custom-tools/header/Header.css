@@ -9,8 +9,13 @@
 
 .custom-tools-header-btns {
   display: flex;
-  justify-content: space-between;
-  margin-left: auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-tools-header-btns .ant-space {
+  display: flex;
+  align-items: center;
 }
 
 .custom-tools-header-btns > div {

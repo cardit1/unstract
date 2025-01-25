@@ -1,5 +1,5 @@
 import { SettingOutlined } from "@ant-design/icons";
-import { Button, Modal, Tooltip, Typography } from "antd";
+import { Button, Modal, Tooltip, Typography, Space, Switch } from "antd";
 import PropTypes from "prop-types";
 import { useCallback, useState } from "react";
 
@@ -43,7 +43,7 @@ function Header({
   setOpenCloneModal,
 }) {
   const [isExportLoading, setIsExportLoading] = useState(false);
-  const { details, isPublicSource } = useCustomToolStore();
+  const { details, isPublicSource, singlePassExtractMode, setSinglePassExtractMode } = useCustomToolStore();
   const { sessionDetails } = useSessionStore();
   const { setAlertDetails } = useAlertStore();
   const axiosPrivate = useAxiosPrivate();
@@ -175,6 +175,19 @@ function Header({
     return userList;
   };
 
+  const handleSinglePassToggle = (checked) => {
+    try {
+      setPostHogCustomEvent("ps_single_pass_toggle", {
+        info: `SinglePass mode ${checked ? 'enabled' : 'disabled'}`,
+      });
+    } catch (err) {
+      // Ignore posthog errors
+    }
+
+    handleUpdateTool({ singlePassMode: checked });
+    setSinglePassExtractMode(checked);
+  };
+
   return (
     <div className="custom-tools-header-layout">
       {isPublicSource ? (
@@ -187,17 +200,23 @@ function Header({
         <HeaderTitle />
       )}
       <div className="custom-tools-header-btns">
-        {SinglePassToggleSwitch && (
-          <SinglePassToggleSwitch handleUpdateTool={handleUpdateTool} />
-        )}
-        <div>
-          <Tooltip title="Settings">
-            <Button
-              icon={<SettingOutlined />}
-              onClick={() => setOpenSettings(true)}
-            />
-          </Tooltip>
-        </div>
+        <Space align="center" style={{ marginRight: '16px' }}>
+          <Typography.Text style={{ marginRight: '8px' }}>
+            SinglePass Extraction
+          </Typography.Text>
+          <Switch
+            checked={singlePassExtractMode}
+            onChange={handleSinglePassToggle}
+          />
+        </Space>
+
+        <Tooltip title="Settings">
+          <Button
+            icon={<SettingOutlined />}
+            onClick={() => setOpenSettings(true)}
+          />
+        </Tooltip>
+
         {CloneButton && <CloneButton setOpenCloneModal={setOpenCloneModal} />}
         {PromptShareButton && (
           <PromptShareButton setOpenShareModal={setOpenShareModal} />

@@ -100,6 +100,7 @@ const useCustomToolStore = create((setState, getState) => ({
     existingState.indexDocs = docs;
     setState(existingState);
   },
+  setSinglePassExtractMode: (mode) => setState({ singlePassExtractMode: mode }),
 }));
 
 export { useCustomToolStore };

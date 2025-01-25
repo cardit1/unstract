@@ -100,6 +100,7 @@ function DocumentManager({ generateIndex, handleUpdateTool, handleDocChange }) {
     isPublicSource,
     refreshRawView,
     selectedHighlight,
+    singlePassExtractMode,
   } = useCustomToolStore();
   const { sessionDetails } = useSessionStore();
   const axiosPrivate = useAxiosPrivate();
@@ -190,6 +191,12 @@ function DocumentManager({ generateIndex, handleUpdateTool, handleDocChange }) {
       }
     }
   }, [indexDocs]);
+
+  useEffect(() => {
+    if (singlePassExtractMode) {
+      handleFetchContent(viewTypes.extract);
+    }
+  }, [singlePassExtractMode]);
 
   const handleFetchContent = (viewType) => {
     if (viewType === viewTypes.original) {
@@ -368,7 +375,7 @@ function DocumentManager({ generateIndex, handleUpdateTool, handleDocChange }) {
             moreIcon={<></>}
           />
         </div>
-        {!isSimplePromptStudio && (
+        {isSimplePromptStudio && (
           <Space>
             <div className="doc-main-title-div">
               {selectedDoc ? (
@@ -397,6 +404,7 @@ function DocumentManager({ generateIndex, handleUpdateTool, handleDocChange }) {
                   !selectedDoc ||
                   isMultiPassExtractLoading ||
                   isSinglePassExtractLoading ||
+                  (singlePassExtractMode && isExtractLoading) ||
                   page <= 1
                 }
                 onClick={handlePageLeft}
@@ -410,6 +418,7 @@ function DocumentManager({ generateIndex, handleUpdateTool, handleDocChange }) {
                   !selectedDoc ||
                   isMultiPassExtractLoading ||
                   isSinglePassExtractLoading ||
+                  (singlePassExtractMode && isExtractLoading) ||
                   page >= listOfDocs?.length
                 }
                 onClick={handlePageRight}
