@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Unstract DB",
+            "Group": "Servers",
+            "Host": "unstract-db",
+            "Port": 5432,
+            "MaintenanceDB": "postgres",
+            "Username": "unstract_dev",
+            "Password": "unstract_pass",
+            "SSLMode": "prefer"
+        }
+    }
+}

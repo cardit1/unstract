@@ -120,9 +120,31 @@ services:
     env_file:
       - ./essentials.env
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: unstract-pgadmin
+    restart: unless-stopped
+    ports:
+      - "8520:80"
+    env_file:
+      - ./essentials.env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@unstract.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-unstract@123}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./config/pgadmin/servers.json:/pgadmin4/servers.json
+    depends_on:
+      - db
+    networks:
+      - default
+    labels:
+      - traefik.enable=false
+
 volumes:
   flipt_data:
   minio_data:
   postgres_data:
   qdrant_data:
   redis_data:
+  pgadmin_data:
