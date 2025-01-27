@@ -315,6 +315,8 @@ run_services() {
 
   if [ "$opt_dev_mode" = true ]; then
     echo -e "$yellow_text""Running in DEVELOPMENT mode with hot reloading""$default_text"
+  else
+    echo -e "$green_text""Running in PRODUCTION mode""$default_text"
   fi
 
   popd 1>/dev/null
