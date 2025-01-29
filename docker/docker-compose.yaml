@@ -29,7 +29,7 @@ services:
       - APPLICATION_NAME=unstract-backend
     labels:
       - traefik.enable=true
-      - traefik.http.routers.backend.rule=Host(`frontend.unstract.localhost`) && PathPrefix(`/api/v1`, `/deployment`)
+      - traefik.http.routers.backend.rule=Host(`dashboard.letshealthpay.com`) && PathPrefix(`/api/v1`) || PathPrefix(`/deployment`)
     extra_hosts:
       # "host-gateway" is a special string that translates to host docker0 i/f IP.
       - "host.docker.internal:host-gateway"
@@ -115,8 +115,6 @@ services:
       - APPLICATION_NAME=unstract-celery-flower
     volumes:
       - unstract_data:/data
-    profiles:
-      - optional
 
   # Celery Beat
   celery-beat:
@@ -138,38 +136,41 @@ services:
   # Frontend React app
   frontend:
     #<prod code>
-    # image: unstract/frontend:${VERSION}
+    image: unstract/frontend:${VERSION}
     # </prod code>
     
     # <dev code>
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile.dev
+    # build:
+    #   context: ../frontend
+    #   dockerfile: Dockerfile.dev
     # </dev code>
     container_name: unstract-frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
       # <dev code>
-    volumes:
-      - ../frontend:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.frontend.rule=Host(`frontend.unstract.localhost`) && !PathPrefix(`/api/v1`, `/deployment`)
+    # volumes:
+    #   - ../frontend:/app
+    #   - /app/node_modules
+    # environment:
+    #   - NODE_ENV=development
+    #   - CHOKIDAR_USEPOLLING=true
+    # labels:
+    #   - traefik.enable=true
+    #   - traefik.http.routers.frontend.rule=Host(`dashboard.letshealthpay.com`) && !PathPrefix(`/api/v1`, `/deployment`)
       # </dev code>
     depends_on:
       - backend
       - reverse-proxy
       # <prod code>
-    # environment:
-    #   - ENVIRONMENT=development
-    # labels:
-    #   - traefik.enable=true
-    #   - traefik.http.routers.frontend.rule=Host(`frontend.unstract.localhost`)  && !PathPrefix(`/api/v1`, `/deployment`)
+    environment:
+      - ENVIRONMENT=development
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend.rule=Host(`dashboard.letshealthpay.com`) #&& !(PathPrefix(`/api/v1`) || PathPrefix(`/deployment`))
+      - traefik.http.routers.frontend.entrypoints=web
+      # - traefik.http.routers.frontend.tls.certresolver=myresolver
+      # - traefik.http.services.frontend.loadbalancer.server.port=3000 
     # </prod code>
 
   platform-service:

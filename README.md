@@ -53,7 +53,7 @@ Automate critical business processes that involve complex documents with a human
 Next, either download a release or clone this repo and do the following:
 
 ✅ `./run-platform.sh`<br>
-✅ Now visit [http://frontend.unstract.localhost](http://frontend.unstract.localhost) in your browser <br>
+✅ Now visit [http://dashboard.letshealthpay.com/](http://dashboard.letshealthpay.com/) in your browser <br>
 ✅ Use username and password `unstract` to login
 
 

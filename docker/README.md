@@ -20,7 +20,7 @@ VERSION=dev docker compose -f docker-compose.yaml up -d
 VERSION=dev docker compose -f docker-compose.yaml up -d frontend
 ```
 
-Now access frontend at http://frontend.unstract.localhost
+Now access frontend at http://dashboard.letshealthpay.com/
 
 # Docker Build and Run Optional Services
 
