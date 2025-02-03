@@ -4,7 +4,9 @@ include:
 services:
   # Backend service
   backend:
-    image: unstract/backend:${VERSION}
+    build:
+      context: ../  # Relative to compose file location
+      dockerfile: docker/dockerfiles/backend.Dockerfile
     container_name: unstract-backend
     restart: unless-stopped
     command: migrate
@@ -22,6 +24,7 @@ services:
       - x2text-service
     volumes:
       - prompt_studio_data:/app/prompt-studio-data
+      - ./backend:/app/backend
       - ./workflow_data:/data
       - ${TOOL_REGISTRY_CONFIG_SRC_PATH}:/data/tool_registry_config
     environment:
